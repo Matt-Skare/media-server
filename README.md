@@ -82,7 +82,6 @@ Configuration steps are as follows:
 
 ```sh
 git clone https://github.com/Matt-Skare/media-server.git
-cd media-server
 ```
 
 ### Build your `.env` file
