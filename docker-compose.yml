@@ -1,0 +1,225 @@
+#                __    __          __                          
+#  _____ _____ _/  |__/  |_  _____|  | _______ _______   ____  
+# /     \\__  \\   __\   __\/  ___/  |/ /\__  \\_  __ \_/ __ \ 
+#|  Y Y  \/ __ \|  |  |  |  \___ \|    <  / __ \|  | \/\  ___/ 
+#|__|_|  (____  /__|  |__| /____  >__|_ \(____  /__|    \___  >
+#      \/     \/                \/     \/     \/            \/ 
+#
+
+version: "3"
+
+services:
+
+  gluetun:
+    image: qmcgaw/gluetun
+    container_name: gluetun
+    # line above must be uncommented to allow external containers to connect.
+    # See https://github.com/qdm12/gluetun-wiki/blob/main/setup/connect-a-container-to-gluetun.md#external-container-to-gluetun
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - "${QBIT_WEBUI_PORT}:${QBIT_WEBUI_PORT}"
+      # - "${QBIT_CONNECTION_PORT}:6881"
+      # - "${QBIT_CONNECTION_PORT}:6881/udp"
+    environment:
+      - VPN_SERVICE_PROVIDER=${VPN_SERVICE_PROVIDER}
+      - VPN_TYPE=${VPN_TYPE}
+      # See https://github.com/qdm12/gluetun-wiki/tree/main/setup#setup
+      # OpenVPN Settings
+      # - OPENVPN_USER=
+      # - OPENVPN_PASSWORD=
+      # Wireguard Settings
+      - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}
+      - WIREGUARD_ADDRESSES=${WIREGUARD_ADDRESSES}
+      - CITY=${WIREGUARD_CITY}
+      # Timezone for accurate log times
+      - TZ=${TIMEZONE}
+      # Server list updater
+      # See https://github.com/qdm12/gluetun-wiki/blob/main/setup/servers.md#update-the-vpn-servers-list
+      # - UPDATER_PERIOD=${UPDATER_PERIOD}
+    volumes:
+      - ${CONFIG_DIR}\gluetun:/gluetun
+    networks:
+      - media-network
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TIMEZONE}
+      - WEBUI_PORT=${QBIT_WEBUI_PORT}
+    volumes:
+      - ${CONFIG_DIR}\qbittorrent:/config
+      - ${DOWNLOAD_DIR}:/data/torrents
+    network_mode: "service:gluetun"
+    restart: unless-stopped
+
+  plex:
+    image: lscr.io/linuxserver/plex:latest
+    container_name: plex
+    ports:
+      - "${PLEX_WEB_PORT}:32400"
+      - "1900:1900"
+      - "3005:3005"
+      - "5353:5353"
+      - "8324:8324"
+      - "32410:32410"
+      - "32412:32412"
+      - "32413:32413"
+      - "32414:32414"
+      - "32469:32469"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TIMEZONE}
+      - VERSION=latest
+      - PLUGIN_LIST=${PLUGIN_LIST}
+    volumes:
+      - ${CONFIG_DIR}\plex:/config
+      - ${MEDIA_DIR}:/data/media
+    restart: unless-stopped
+    networks:
+      - media-network
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    ports:
+      - "${SONARR_PORT}:8989"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TIMEZONE}
+    volumes:
+      - ${CONFIG_DIR}\sonarr:/config
+      - ${DATA_DIR}:/data
+    restart: unless-stopped
+    networks:
+      - media-network
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    ports:
+      - "${RADARR_PORT}:7878"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TIMEZONE}
+    volumes:
+      - ${CONFIG_DIR}\radarr:/config
+      - ${DATA_DIR}:/data
+    restart: unless-stopped
+    networks:
+      - media-network
+      
+  lidarr:
+    image: lscr.io/linuxserver/lidarr:latest
+    container_name: lidarr
+    ports:
+      - "${LIDARR_PORT}:8686"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TIMEZONE}
+    volumes:
+      - ${CONFIG_DIR}\lidarr:/config
+      - ${DATA_DIR}:/data
+    restart: unless-stopped
+    networks:
+      - media-network
+    
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    ports:
+      - "${BAZARR_PORT}:6767"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TIMEZONE}
+    volumes:
+      - ${CONFIG_DIR}\bazarr:/config
+      - ${DATA_DIR}:/data
+    restart: unless-stopped
+    networks:
+      - media-network
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TIMEZONE}
+    volumes:
+      - ${CONFIG_DIR}\prowlarr:/config
+    ports:
+      - "${PROWLARR_PORT}:9696"
+    restart: unless-stopped
+    networks:
+      - media-network
+
+  overseerr:
+    image: lscr.io/linuxserver/overseerr:latest
+    container_name: overseerr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TIMEZONE}
+    volumes:
+      - ${CONFIG_DIR}\overseerr:/config
+    ports:
+      - "${OVERSEERR_PORT}:5055"
+    restart: unless-stopped
+    networks:
+      - media-network
+      
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    ports:
+      - "${PORT:-8191}:8191"
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - LOG_HTML=${LOG_HTML:-false}
+      - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-none}
+      - TZ=${TIMEZONE}
+    restart: unless-stopped
+    networks:
+      - media-network
+
+#  heimdall:
+#    image: lscr.io/linuxserver/heimdall:latest
+#    container_name: heimdall
+#    environment:
+#      - PUID=${PUID}
+#      - PGID=${PGID}
+#      - TZ=${TIMEZONE}
+#    volumes:
+#      - ${CONFIG_DIR}\heimdall:/config
+#    ports:
+#      - "${HEIMDALL_PORT}:80"
+#      - "${HEIMDALL_SSL_PORT}:443"
+#    restart: unless-stopped
+#    networks:
+#      - media-network
+#
+#  nginx:
+#    image: 'jc21/nginx-proxy-manager:latest'
+#    container_name: nginx
+#    ports:
+#      - '80:80'
+#      - '81:81'
+#      - '443:443'
+#    volumes:
+#      - ${CONFIG_DIR}\nginx\data:/data
+#      - ${CONFIG_DIR}\nginx\letsencrypt:/etc/letsencrypt
+#    restart: unless-stopped
+#    networks:
+#      - media-network
+
+networks:
+  media-network:
