@@ -122,11 +122,11 @@ UPDATER_PERIOD=
 
 ### Deploying the server
 
-When you are finished making changes to the included `config.env` file save it and run `setup.ps1`
+When you are finished making changes to the included `config.env` file save it and run `setup.ps1`. Let it finish, it's not frozen it's just waiting for the server to complete before some final configurations.
 
 ## Configuration
 
-This guide will assume you are using default configurations.
+This guide will assume you are using default configurations. Once the powershell script is done deploying the server we can start configuring the applications.
 
 ### Configure qBittorrent
 
