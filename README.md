@@ -90,7 +90,7 @@ The provided `config.env` file contains my recommend configuration, which is mos
 
 #### VPN setup
 
-This media server uses `gluetun` to provide a VPN service to other containers. I will include instructions for configuring gluetun to use Mullvad, all other VPN providers are outside the scope of this documentation.
+This media server uses `gluetun` to provide a VPN service to other containers. I will include instructions for configuring gluetun to use Mullvad, all other VPN providers are outside the scope of this documentation. For more information on configuring other providers visit the [gluetun](https://github.com/qdm12/gluetun) github repo.
 
 - Retrieve your wireguard configuration from Mullvad
   - Go to your Mullvad account page
