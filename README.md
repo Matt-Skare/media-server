@@ -44,16 +44,6 @@ The media server uses the following components
 - `lidarr`
 - `prowlarr`
 - `bazarr`
-- ~~`tautulli`~~ (future)
-  - to look at plex server logs
-- ~~`portainer`~~ (future)
-  - container management
-- ~~`watchtower`~~ (future)
-  - automating container updates
-- ~~`nginx + letsencrypt`~~ (future)
-  - reverse proxying to reach your services at \*.domain.tld
-- ~~`heimdall`~~ (future)
-  - application dashboard
 - `gluetun`
 - `qBittorrent`
 - `overseerr`
@@ -336,6 +326,12 @@ This project is based on a few other media servers that also use docker and *arr
 - Auto-configuration for `plex` libraries
 - Improve documentation
 - Better health checking
+- `tautulli` to look at plex server logs
+- `portainer` for container management
+- `watchtower` for automating container updates
+- `cloudflared` for secure remote access via cloudfare
+- `heimdall` or another application dashboard
+- `authentik` for SSO
 
 ## Troubleshooting
 
